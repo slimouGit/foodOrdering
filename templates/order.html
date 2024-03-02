@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order</title>
+</head>
+<body>
+    <h1>Your Order:</h1>
+    <ul>
+        {% for word in order %}
+            <li>{{ word }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

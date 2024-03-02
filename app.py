@@ -1,5 +1,7 @@
 from openai import OpenAI
-from flask import Flask
+from urllib import response
+
+from flask import Flask, render_template
 from config import API_KEY
 
 client = OpenAI(api_key=API_KEY)
@@ -8,12 +10,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def yourDriveIn():
-    return 'Welcome to drive in!'
+    return render_template('index.html')
 
 @app.route('/order')
 def takeOrder():
     textToSpeech()
-    return 'Your order please!'
+    order = speechToText()
+    return render_template('order.html', order=order)
 
 def textToSpeech():
     response = client.audio.speech.create(
@@ -37,6 +40,8 @@ def speechToText():
     print(transcript.words)
     for word_info in transcript.words:
         print(word_info['word'])
+    return [word_info['word'] for word_info in transcript.words]
+
 
 if __name__ == '__main__':
     app.run()

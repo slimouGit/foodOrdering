@@ -22,7 +22,7 @@ def textToSpeech():
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Burger Coke",
+        input="Burger Coke Nuggets",
     )
 
     with open("order.mp3", "wb") as out_file:

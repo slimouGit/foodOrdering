@@ -2,13 +2,36 @@
 <html>
 <head>
     <title>Order</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+        }
+        .image-container {
+            width: 33.33%;
+            float: left;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Order:</h1>
-    <ul>
+    <h1>Confirm your Order</h1>
+    <div class="clearfix">
         {% for word in order %}
-            <li>{{ word }}</li>
+            <div class="image-container">
+                <p>{{ word }}</p>
+                <img src="{{ url_for('static', filename=word + '.jpg') }}" alt="{{ word }}">
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 </body>
 </html>

@@ -12,12 +12,22 @@ app = Flask(__name__)
 def yourDriveIn():
     return render_template('index.html')
 
+
+#Order is checked and available components are returned
+def validateOrder(order):
+    #validate order and redirect to error page if necessary
+    return order
+
+
+#Determined order is displayed for confirmation
 @app.route('/order')
 def takeOrder():
     textToSpeech()
     order = speechToText()
+    order = validateOrder(order)
     return render_template('order.html', order=order)
 
+#voice input of the customer is simulated and saved as mp3
 def textToSpeech():
     response = client.audio.speech.create(
         model="tts-1",
@@ -29,6 +39,7 @@ def textToSpeech():
         out_file.write(response.read())
         speechToText()
 
+#the customer's voice input is interpreted and converted into text
 def speechToText():
     audio_file = open("order.mp3", "rb")
     transcript = client.audio.transcriptions.create(

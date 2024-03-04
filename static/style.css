@@ -1,0 +1,14 @@
+body{
+    font-family: Arial, sans-serif;
+}
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.image-container {
+    flex: 1 0 calc(33.33% - 20px);
+    margin: 10px;
+    box-sizing: border-box;
+}

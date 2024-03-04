@@ -2,30 +2,11 @@
 <html>
 <head>
     <title>Order</title>
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-        }
-        .image-container {
-            width: 33.33%;
-            float: left;
-            box-sizing: border-box;
-            padding: 5px;
-        }
-        .image-container img {
-            width: 100%;
-            height: auto;
-        }
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
 </head>
 <body>
     <h1>Confirm your Order</h1>
-    <div class="clearfix">
+    <div class="container">
         {% for word in order %}
             <div class="image-container">
                 <p>{{ word }}</p>

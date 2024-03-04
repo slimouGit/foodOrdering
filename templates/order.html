@@ -1,37 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Order</title>
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-        }
-        .image-container {
-            width: 33.33%;
-            float: left;
-            box-sizing: border-box;
-            padding: 5px;
-        }
-        .image-container img {
-            width: 100%;
-            height: auto;
-        }
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Confirm your Order</h1>
-    <div class="clearfix">
-        {% for word in order %}
-            <div class="image-container">
-                <p>{{ word }}</p>
-                <img src="{{ url_for('static', filename=word + '.jpg') }}" alt="{{ word }}">
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap -mx-4 mt-5">
+            <div class="w-full md:w-2/3 px-4 mb-6 md:mb-0">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Confirm Your Order</h1>
+                <div class="flex flex-wrap -mx-2">
+                    {% for word in order %}
+                        {% if word.startswith('Error') %}
+                            <div class="w-full px-2">
+                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                    <strong class="font-bold">Error!</strong>
+                                    <span class="block sm:inline">{{ word }}</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="w-full sm:w-1/2 px-2 mb-4">
+                                <div class="bg-white rounded-lg overflow-hidden shadow-lg">
+                                    <div class="bg-cover bg-center h-48" style="background-image: url('{{ url_for('static', filename=word + '.jpg') }}');"></div>
+                                    <div class="p-4">
+                                        <h3 class="font-bold text-xl mb-2 text-gray-800">{{ word }}</h3>
+                                    </div>
+                                    <div class="px-4 pb-4">
+                                        <span class="bg-black text-white text-sm py-1 px-3 rounded-full">Order</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-        {% endfor %}
+            <div class="w-full md:w-1/3 px-4">
+                <div class="bg-white p-5 rounded-lg shadow-xl">
+                    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+                    <ul class="mb-4">
+                        {% for word in order %}
+                            <li class="border-b py-2">{{ word }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div>
+                        <a href="#" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full text-center block mb-2">Place Order</a>
+                        <a href="/" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded w-full text-center block">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

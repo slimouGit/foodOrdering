@@ -3,8 +3,9 @@ from openai import OpenAI
 import json
 from urllib import response
 
-from flask import Flask, render_template
-from config import API_KEY
+from flask import Flask, render_template, request
+import os
+from config import API_KEY, PATH
 
 client = OpenAI(api_key=API_KEY)
 
@@ -85,6 +86,15 @@ def speechToText():
     # for word_info in transcript.words:
     #     print(word_info['word'])
     # return [word_info['word'] for word_info in transcript.words]
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    file = request.files['file']
+    output_directory = PATH
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+    file.save(os.path.join(output_directory, 'order.mp3'))
+    return '', 204
 
 
 if __name__ == '__main__':

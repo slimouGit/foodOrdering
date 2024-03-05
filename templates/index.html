@@ -14,45 +14,40 @@
 </div>
 <a href="/order"><img src="../static/microphone.jpg"></a>
 <script>
-    let chunks = [];
-    let mediaRecorder;
+        let chunks = [];
+        let mediaRecorder;
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
 
-            mediaRecorder.onstart = function() {
-                chunks = [];
-            };
+                mediaRecorder.onstart = function() {
+                    chunks = [];
+                };
 
-            mediaRecorder.ondataavailable = function(e) {
-                chunks.push(e.data);
-            };
+                mediaRecorder.ondataavailable = function(e) {
+                    chunks.push(e.data);
+                };
 
-            mediaRecorder.onstop = function() {
-                let blob = new Blob(chunks, { 'type' : 'audio/mp3' });
-                let url = window.URL.createObjectURL(blob);
-                let a = document.createElement("a");
-                document.body.appendChild(a);
-                a.style = "display: none";
-                a.href = url;
-                a.download = 'order.mp3';
-                a.click();
-                window.URL.revokeObjectURL(url);
-            };
-        });
+                mediaRecorder.onstop = function() {
+                    let blob = new Blob(chunks, { 'type' : 'audio/mp3' });
+                    let formData = new FormData();
+                    formData.append('file', blob, 'recording.mp3');
+                    fetch('/upload', { method: 'POST', body: formData });
+                };
+            });
 
-    document.querySelector('#start').onclick = () => {
-        mediaRecorder.start();
-        document.querySelector('#start').disabled = true;
-        document.querySelector('#stop').disabled = false;
-    };
+        document.querySelector('#start').onclick = () => {
+            mediaRecorder.start();
+            document.querySelector('#start').disabled = true;
+            document.querySelector('#stop').disabled = false;
+        };
 
-    document.querySelector('#stop').onclick = () => {
-        mediaRecorder.stop();
-        document.querySelector('#start').disabled = false;
-        document.querySelector('#stop').disabled = true;
-    };
-</script>
+        document.querySelector('#stop').onclick = () => {
+            mediaRecorder.stop();
+            document.querySelector('#start').disabled = false;
+            document.querySelector('#stop').disabled = true;
+        };
+    </script>
 </body>
 </html>

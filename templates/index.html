@@ -9,45 +9,51 @@
 <h1>Welcome to your DriveIn</h1>
 <p>what is your order</p>
 <div>
-    <button id="start">Start</button>
+    <button id="start">Record Order</button>
     <button id="stop" disabled>Stop</button>
+    <button id="order" disabled>place order</button>
 </div>
-<a href="/order"><img src="../static/microphone.jpg"></a>
+<!--<a href="/order"><img src="../static/microphone.jpg"></a>-->
 <script>
-        let chunks = [];
-        let mediaRecorder;
+    let chunks = [];
+    let mediaRecorder;
 
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
 
-                mediaRecorder.onstart = function() {
-                    chunks = [];
-                };
+            mediaRecorder.onstart = function() {
+                chunks = [];
+            };
 
-                mediaRecorder.ondataavailable = function(e) {
-                    chunks.push(e.data);
-                };
+            mediaRecorder.ondataavailable = function(e) {
+                chunks.push(e.data);
+            };
 
-                mediaRecorder.onstop = function() {
-                    let blob = new Blob(chunks, { 'type' : 'audio/mp3' });
-                    let formData = new FormData();
-                    formData.append('file', blob, 'recording.mp3');
-                    fetch('/upload', { method: 'POST', body: formData });
-                };
-            });
+            mediaRecorder.onstop = function() {
+                let blob = new Blob(chunks, { 'type' : 'audio/mp3' });
+                let formData = new FormData();
+                formData.append('file', blob, 'recording.mp3');
+                fetch('/upload', { method: 'POST', body: formData });
+            };
+        });
 
-        document.querySelector('#start').onclick = () => {
-            mediaRecorder.start();
-            document.querySelector('#start').disabled = true;
-            document.querySelector('#stop').disabled = false;
-        };
+    document.querySelector('#start').onclick = () => {
+        mediaRecorder.start();
+        document.querySelector('#start').disabled = true;
+        document.querySelector('#stop').disabled = false;
+    };
 
-        document.querySelector('#stop').onclick = () => {
-            mediaRecorder.stop();
-            document.querySelector('#start').disabled = false;
-            document.querySelector('#stop').disabled = true;
-        };
-    </script>
+    document.querySelector('#stop').onclick = () => {
+        mediaRecorder.stop();
+        document.querySelector('#start').disabled = false;
+        document.querySelector('#stop').disabled = true;
+        document.querySelector('#order').disabled = false;
+    };
+
+    document.querySelector('#order').onclick = () => {
+        window.location.href = "/order";
+    };
+</script>
 </body>
 </html>

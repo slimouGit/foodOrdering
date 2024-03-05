@@ -57,7 +57,7 @@ def validateOrder(order_transcription):
 #Determined order is displayed for confirmation
 @app.route('/order')
 def takeOrder():
-    textToSpeech()
+    # textToSpeech()
     order = speechToText()
     order = validateOrder(order)
     return render_template('order.html', order=order)
@@ -87,12 +87,12 @@ def speechToText():
     #     print(word_info['word'])
     # return [word_info['word'] for word_info in transcript.words]
 
+
+# retrieve audio file and save to the specified output directory, returning HTTP status code of 204
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['file']
     output_directory = PATH
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
     file.save(os.path.join(output_directory, 'order.mp3'))
     return '', 204
 

@@ -5,6 +5,7 @@ from urllib import response
 
 from flask import Flask, render_template
 from config import API_KEY
+import sqlite3
 
 client = OpenAI(api_key=API_KEY)
 
@@ -12,6 +13,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def yourDriveIn():
+    initGoods()
     return render_template('index.html')
 
 
@@ -85,6 +87,45 @@ def speechToText():
     # for word_info in transcript.words:
     #     print(word_info['word'])
     # return [word_info['word'] for word_info in transcript.words]
+
+def initGoods():
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS goods")
+    c.execute('''CREATE TABLE goods
+                     (id INTEGER PRIMARY KEY, name text, description text, price real, image_path text)''')
+    c.execute(
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('Chicken Nuggets', 'Delicious chicken nuggets', 35.14, 'static/Burger.jpg')")
+    c.execute(
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('Coca Cola', 'Wonderfull Softdrink', 5.14, 'static/Coke.jpg')")
+    conn.commit()
+    c.execute(
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('Chicken Nuggets', 'Crunchy Nuggets', 25.14, 'static/Nuggets.jpg')")
+    conn.commit()
+    c.execute('SELECT * FROM goods')
+    print(c.fetchall())
+    conn.close()
+
+@app.route('/goods')
+def showGoods():
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM goods')
+    data = c.fetchall()
+    conn.close()
+    return render_template('goods.html', data=data)
+
+@app.route('/goods/<int:id>')
+def get_goods_by_id(id):
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM goods WHERE id=?', (id,))
+    data = c.fetchone()
+    conn.close()
+    if data is None:
+        return "No data found for ID: " + str(id), 404
+    else:
+        return render_template('goods.html', data=[data])
 
 
 if __name__ == '__main__':

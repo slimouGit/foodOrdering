@@ -1,3 +1,5 @@
 config.py
 __pycache__/
 .idea/
+uploads/*
+goods.db

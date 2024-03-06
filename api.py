@@ -2,7 +2,12 @@ import openai
 from flask import render_template
 from openai import OpenAI
 import json
-from config import API_KEY
+from config import API_KEY, PATH
+import os
+import glob
+from operator import itemgetter
+import uuid
+import time
 
 client = OpenAI(api_key=API_KEY)
 
@@ -46,33 +51,46 @@ def validateOrder(order_transcription):
         return ["Error: An unexpected error occurred."]
 
 #Determined order is displayed for confirmation
-def takeOrder():
-    textToSpeech()
-    order = speechToText()
-    order = validateOrder(order)
-    return render_template('order.html', order=order)
+# def takeOrder():
+#     textToSpeech()
+#     order = speechToText()
+#     order = validateOrder(order)
+#     return render_template('order.html', order=order)
+
+def find_latest_recording(uuid):
+    search_pattern = os.path.join(PATH, f'order_{uuid}_*.mp3')
+    recordings = glob.glob(search_pattern)
+    if not recordings:
+        return None
+    # Extract timestamps and sort
+    recordings_with_time = [(path, int(path.split('_')[-1].split('.')[0])) for path in recordings]
+    latest_recording = max(recordings_with_time, key=itemgetter(1))[0]
+    return latest_recording
 
 #voice input of the customer is simulated and saved as mp3
-def textToSpeech():
+def textToSpeech(input_text, output_directory):
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="I would like to order a burger with nuggets and a coke.",
+        input=input_text,
     )
-
-    with open("order.mp3", "wb") as out_file:
+    
+    recording_uuid = str(uuid.uuid4())
+    timestamp = str(int(time.time()))
+    filename = f'order_{recording_uuid}_{timestamp}.mp3'
+    file_path = os.path.join(output_directory, filename)
+    
+    with open(file_path, "wb") as out_file:
         out_file.write(response.read())
-        speechToText()
+    
+    return recording_uuid
 
 #the customer's voice input is interpreted and converted into text
-def speechToText():
-    audio_file = open("order.mp3", "rb")
-    transcript = client.audio.transcriptions.create(
-        file=audio_file,
-        model="whisper-1",
-    )
+def speechToText(audio_file_path):
+    with open(audio_file_path, "rb") as audio_file:
+        transcript = client.audio.transcriptions.create(
+            file=audio_file,
+            model="whisper-1",
+        )
     print(transcript.text)
     return transcript.text
-    # for word_info in transcript.words:
-    #     print(word_info['word'])
-    # return [word_info['word'] for word_info in transcript.words]

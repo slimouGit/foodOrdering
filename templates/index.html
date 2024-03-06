@@ -1,12 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Order</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaceburgers Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media (min-width: 1024px) {
+            .hero-bg {
+                background-image: url('./static/background.png');
+                background-size: cover;
+                background-position: center right;
+            }
+        }
+    </style>
 </head>
-<body>
-    <h1>Welcome to your DriveIn</h1>
-    <p>what is your order</p>
-    <a href="/order"><img src="../static/microphone.jpg"></a>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex flex-col md:flex-row hero-bg">
+        <div class="md:w-1/2 p-10 flex flex-col justify-center">
+            <h3 class="text-xl text-gray-700">You're hungry? We've got you covered!</h3>
+            <h1 class="text-4xl font-bold text-gray-900 mt-2">Spaceburgers</h1>
+            <hr class="my-4 border-gray-300">
+            <p class="text-gray-600 mb-6">Our lovely robot is looking forward to take your order.</p>
+            <button id="actionBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full">
+                🎙️ Record my order
+            </button>
+        </div>
+        <div class="md:w-1/2 flex md:justify-end">
+            <!-- Background image for desktop is handled via CSS -->
+        </div>
+    </div>
+
+    <script>
+        let state = 'idle'; // Possible states: idle, recording, sending
+        let mediaRecorder;
+        let chunks = [];
+
+        const actionBtn = document.querySelector('#actionBtn');
+        updateButton();
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.onstart = () => {
+                    chunks = [];
+                    state = 'recording';
+                    updateButton();
+                };
+
+                mediaRecorder.ondataavailable = (e) => {
+                    chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    state = 'sending';
+                    updateButton();
+
+                    const blob = new Blob(chunks, { 'type' : 'audio/mp3' });
+                    const formData = new FormData();
+                    formData.append('file', blob, 'recording.mp3');
+                    const uploadResult = await fetch('/upload', { method: 'POST', body: formData });
+                    if(uploadResult.ok) {
+                        const result = await uploadResult.json();
+                        window.location.href = "/order?recording_id=" + result.recording_id;
+                    }
+                };
+
+                actionBtn.addEventListener('click', () => {
+                    if (state === 'idle') {
+                        mediaRecorder.start();
+                    } else if (state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                });
+            });
+
+        function updateButton() {
+            if (state === 'idle') {
+                actionBtn.textContent = '🎙️ Record my order';
+                actionBtn.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full';
+            } else if (state === 'recording') {
+                actionBtn.textContent = 'Stop recording';
+                actionBtn.className = 'bg-red-500 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full';
+            } else if (state === 'sending') {
+                actionBtn.textContent = 'Sending...';
+                actionBtn.disabled = true;
+                actionBtn.className = 'bg-gray-500 text-white font-bold py-4 px-8 rounded-full';
+            }
+        }
+    </script>
 </body>
 </html>

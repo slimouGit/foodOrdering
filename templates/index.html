@@ -1,94 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spaceburgers Order</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <style>
-        @media (min-width: 1024px) {
-            .hero-bg {
-                background-image: url('./static/background.png');
-                background-size: cover;
-                background-position: center right;
-            }
+      @media (min-width: 1024px) {
+        .hero-bg::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background: rgba(0, 0, 0, 0.5); /* Black overlay with opacity */
+          z-index: 10;
         }
+        .hero-bg {
+          background-image: url("./static/background.png");
+          background-size: cover;
+          background-position: center right;
+          position: relative;
+        }
+      }
+
+      .gradient-btn {
+        background-image: linear-gradient(to right, #f6d365 0%, #fda085 100%);
+        position: relative;
+        z-index: 10;
+      }
+
+      .gradient-btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.15);
+        z-index: -1;
+        border-radius: inherit;
+      }
+
+      .gradient-recording {
+        background-image: linear-gradient(to right, #ef5777 0%, #575fcf 100%);
+      }
+
+      .text-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      @keyframes pulseAnimation {
+        0%,
+        100% {
+          transform: scale(1);
+          background-color: #4b5563;
+        }
+        50% {
+          transform: scale(1.05);
+          background-color: #374151;
+        }
+      }
+
+      .pulse {
+        animation: pulseAnimation 2s infinite;
+      }
     </style>
-</head>
-<body class="bg-gray-50">
+  </head>
+  <body class="bg-gray-800">
     <div class="min-h-screen flex flex-col md:flex-row hero-bg">
-        <div class="md:w-1/2 p-10 flex flex-col justify-center">
-            <h3 class="text-xl text-gray-700">You're hungry? We've got you covered!</h3>
-            <h1 class="text-4xl font-bold text-gray-900 mt-2">Spaceburgers</h1>
-            <hr class="my-4 border-gray-300">
-            <p class="text-gray-600 mb-6">Our lovely robot is looking forward to take your order.</p>
-            <button id="actionBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full">
-                🎙️ Record my order
-            </button>
-        </div>
-        <div class="md:w-1/2 flex md:justify-end">
-            <!-- Background image for desktop is handled via CSS -->
-        </div>
+      <div class="md:w-1/2 p-10 flex flex-col justify-center relative z-20">
+        <h3 class="text-xl text-white">
+          You're hungry? We've got you covered!
+        </h3>
+        <h1 class="text-4xl font-bold text-white mt-2">Spaceburgers</h1>
+        <hr class="my-4 border-gray-300" />
+        <p class="text-white mb-6">
+          Our lovely robot is looking forward to take your order.
+        </p>
+        <button id="actionBtn">🎙️ Record my order</button>
+      </div>
+      <!-- Background image for desktop is handled via CSS, with a shadow overlay -->
+      <div class="md:w-1/2"></div>
     </div>
 
     <script>
-        let state = 'idle'; // Possible states: idle, recording, sending
-        let mediaRecorder;
-        let chunks = [];
+      let state = "idle"; // Possible states: idle, recording, sending
+      let mediaRecorder;
+      let chunks = [];
 
-        const actionBtn = document.querySelector('#actionBtn');
-        updateButton();
+      const actionBtn = document.querySelector("#actionBtn");
+      updateButton();
 
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        mediaRecorder = new MediaRecorder(stream);
 
-                mediaRecorder.onstart = () => {
-                    chunks = [];
-                    state = 'recording';
-                    updateButton();
-                };
+        mediaRecorder.onstart = () => {
+          chunks = [];
+          state = "recording";
+          updateButton();
+        };
 
-                mediaRecorder.ondataavailable = (e) => {
-                    chunks.push(e.data);
-                };
+        mediaRecorder.ondataavailable = (e) => {
+          chunks.push(e.data);
+        };
 
-                mediaRecorder.onstop = async () => {
-                    state = 'sending';
-                    updateButton();
+        mediaRecorder.onstop = async () => {
+          state = "sending";
+          updateButton();
 
-                    const blob = new Blob(chunks, { 'type' : 'audio/mp3' });
-                    const formData = new FormData();
-                    formData.append('file', blob, 'recording.mp3');
-                    const uploadResult = await fetch('/upload', { method: 'POST', body: formData });
-                    if(uploadResult.ok) {
-                        const result = await uploadResult.json();
-                        window.location.href = "/order?recording_id=" + result.recording_id;
-                    }
-                };
+          const blob = new Blob(chunks, { type: "audio/mp3" });
+          const formData = new FormData();
+          formData.append("file", blob, "recording.mp3");
+          const uploadResult = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadResult.ok) {
+            const result = await uploadResult.json();
+            window.location.href = "/order?recording_id=" + result.recording_id;
+          }
+        };
 
-                actionBtn.addEventListener('click', () => {
-                    if (state === 'idle') {
-                        mediaRecorder.start();
-                    } else if (state === 'recording') {
-                        mediaRecorder.stop();
-                    }
-                });
-            });
+        actionBtn.addEventListener("click", () => {
+          if (state === "idle") {
+            mediaRecorder.start();
+          } else if (state === "recording") {
+            mediaRecorder.stop();
+          }
+        });
+      });
 
-        function updateButton() {
-            if (state === 'idle') {
-                actionBtn.textContent = '🎙️ Record my order';
-                actionBtn.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full';
-            } else if (state === 'recording') {
-                actionBtn.textContent = 'Stop recording';
-                actionBtn.className = 'bg-red-500 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full';
-            } else if (state === 'sending') {
-                actionBtn.textContent = 'Sending...';
-                actionBtn.disabled = true;
-                actionBtn.className = 'bg-gray-500 text-white font-bold py-4 px-8 rounded-full';
-            }
+      function updateButton() {
+        if (state === "idle") {
+          actionBtn.textContent = "🎙️ Record my order";
+          actionBtn.className =
+            "gradient-btn hover:bg-opacity-90 text-white font-bold py-4 px-8 rounded-full transition ease-in-out duration-150 text-shadow";
+        } else if (state === "recording") {
+          actionBtn.textContent = "Stop recording";
+          actionBtn.className =
+            "gradient-recording hover:bg-opacity-90 text-white font-bold py-4 px-8 rounded-full transition ease-in-out duration-150 text-shadow";
+        } else if (state === "sending") {
+          actionBtn.textContent = "Sending...";
+          actionBtn.disabled = true;
+          actionBtn.className =
+            "bg-gray-500 text-white font-bold py-4 px-8 rounded-full pulse";
         }
+      }
     </script>
-</body>
+  </body>
 </html>

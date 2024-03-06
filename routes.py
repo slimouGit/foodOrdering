@@ -2,7 +2,7 @@ import time
 import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
-from database import initGoods, showGoods, get_goods_by_id
+from database import initGoods, showGoods, get_goods_by_id, get_item_by_name, get_items_from_db
 import os
 from flask import request
 from config import PATH
@@ -32,20 +32,25 @@ def upload():
 def takeOrder():
     text = request.args.get('text')
     recording_id = request.args.get('recording_id')
-    
+
+    itemDto = []  # Initialize itemDto as an empty list
+
     if text:
         # Process the provided text
-        order = validateOrder(text)
+        itemDto = validateOrder(text)
+        # itemDto = get_items_from_db(items)
     elif recording_id:
         recording_path = find_latest_recording(recording_id)
         if not recording_path:
             return render_template('error.html', message="We're sorry, we couldn't find your order recording.")
         text = speechToText(recording_path)
-        order = validateOrder(text)
+        items = validateOrder(text)
+        # itemDto = get_items_from_db(items)
     else:
-        return render_template('error.html', message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
+        return render_template('error.html',
+                               message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
 
-    return render_template('order.html', order=order)
+    return render_template('order.html', items=items)
 
 
 @app.route('/goods')
@@ -57,6 +62,14 @@ def showGoodsRoute():
 @app.route('/goods/<int:id>')
 def get_goods_by_id_route(id):
     data = get_goods_by_id(id)
+    if data is None:
+        return "No data found for ID: " + str(id), 404
+    else:
+        return render_template('goods.html', data=[data])
+
+@app.route('/goods/<string:name>')
+def get_item_by_name_route(name):
+    data = get_item_by_name(name)
     if data is None:
         return "No data found for ID: " + str(id), 404
     else:

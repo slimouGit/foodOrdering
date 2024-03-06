@@ -9,6 +9,8 @@ from operator import itemgetter
 import uuid
 import time
 
+from database import get_items_from_db
+
 client = OpenAI(api_key=API_KEY)
 
 
@@ -31,6 +33,7 @@ def validateOrder(order_transcription):
             json_string = response.choices[0].message.content
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
+            itemDto = get_items_from_db(items)
             return items
         else:
             return ["Error: Unable to process the order. Please try again."]

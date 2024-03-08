@@ -8,6 +8,9 @@ import glob
 from operator import itemgetter
 import uuid
 import time
+import tempfile
+from pathlib import Path
+import io
 
 client = OpenAI(api_key=API_KEY)
 
@@ -86,11 +89,41 @@ def textToSpeech(input_text, output_directory):
     return recording_uuid
 
 #the customer's voice input is interpreted and converted into text
+# def speechToText(audio_file_path):
+#     with open(audio_file_path, "rb") as audio_file:
+#         transcript = client.audio.transcriptions.create(
+#             file=audio_file,
+#             model="whisper-1",
+#         )
+#     print(transcript.text)
+#     return transcript.text
 def speechToText(audio_file_path):
+    print(f"Attempting to transcribe file: {audio_file_path}")
+    if os.path.exists(audio_file_path):
+        print(f"File exists. Size: {os.path.getsize(audio_file_path)} bytes")
+    else:
+        print("File does not exist.")
+        return "Error: File does not exist."
+
     with open(audio_file_path, "rb") as audio_file:
-        transcript = client.audio.transcriptions.create(
-            file=audio_file,
-            model="whisper-1",
-        )
-    print(transcript.text)
+        try:
+            transcript = client.audio.transcriptions.create(
+                file=audio_file,
+                model="whisper-1",
+            )
+            print(transcript.text)
+            return transcript.text
+        except openai.BadRequestError as e:
+            print(f"Transcription error: {str(e)}")
+            return "Error during transcription."
+
+
+def streaming_audio_to_text(audio_chunk):
+    audio_bytes = audio_chunk.read()
+    buffer = io.BytesIO(audio_bytes)
+    buffer.name = 'audio.webm'
+    transcript = client.audio.transcriptions.create(
+        file=buffer,
+        model="whisper-1",
+    )
     return transcript.text

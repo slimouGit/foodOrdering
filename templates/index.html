@@ -69,6 +69,46 @@
       .pulse {
         animation: pulseAnimation 2s infinite;
       }
+
+      /* Grid item size variations */
+      .grid-span-2 {
+        grid-column: span 2;
+      }
+      .grid-span-3 {
+        grid-column: span 3;
+      }
+      .grid-row-2 {
+        grid-row: span 2;
+      }
+
+      /* Highlight effect */
+      @keyframes glow {
+        0%,
+        100% {
+          box-shadow: 0 0 8px 2px yellow;
+        }
+        50% {
+          box-shadow: 0 0 16px 4px yellow;
+        }
+      }
+
+      @keyframes sparklingGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 8px 2px #ffd700;
+          border-color: #ffd700;
+        }
+        50% {
+          box-shadow: 0 0 12px 3px #ffa500;
+          border-color: #ffa500;
+        }
+      }
+
+      .highlight {
+        animation: sparklingGlow 2s infinite alternate;
+        transform: scale(1.05);
+        border: 2px solid #ffd700; /* Initial state color */
+      }
     </style>
   </head>
   <body class="bg-gray-800">
@@ -85,13 +125,58 @@
         <button id="actionBtn">🎙️ Record my order</button>
       </div>
       <!-- Background image for desktop is handled via CSS, with a shadow overlay -->
-      <div class="md:w-1/2"></div>
+      <div class="md:w-1/2">
+        <div class="container mx-auto p-6 relative z-20">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="bentoGrid">
+            {% for item in items %}
+            <div
+              class="card bg-white rounded-lg overflow-hidden shadow-lg p-4 transition-transform duration-500 {{ item[-1] }}"
+              id="item-{{ item[0] }}"
+            >
+              <img src="{{ item[4] }}" alt="{{ item[1] }}" class="w-full" />
+              <h5 class="text-gray-900 text-xl leading-tight font-medium mb-2">
+                {{ item[1] }}
+              </h5>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
       let state = "idle"; // Possible states: idle, recording, sending
       let mediaRecorder;
       let chunks = [];
+
+      var socket = io.connect(
+        "http://" + document.domain + ":" + location.port
+      );
+
+      socket.on("connect", function () {
+        console.log("Websocket connected!");
+      });
+
+      let clientUUID = null;
+      socket.on("assign_uuid", function (data) {
+        clientUUID = data.uuid;
+        console.log("Assigned UUID:", clientUUID);
+        // You can now use clientUUID to identify this client in future communications
+      });
+
+      socket.on("highlight", function (data) {
+        console.log("Highlighting item:", data);
+        const { typ, id } = data;
+        const itemElement = document.getElementById(`item-${id}`);
+        if (!itemElement) return;
+
+        if (typ === "select") {
+          itemElement.classList.add("highlight");
+        } else if (typ === "deselect") {
+          itemElement.classList.remove("highlight");
+        }
+      });
 
       const actionBtn = document.querySelector("#actionBtn");
       updateButton();
@@ -105,7 +190,24 @@
           updateButton();
         };
 
-        mediaRecorder.ondataavailable = (e) => {
+        mediaRecorder.ondataavailable = async (e) => {
+          if (e.data.size > 0) {
+            chunks.push(e.data);
+
+            // Debugging: Log the audio chunk data
+            console.log("Data available", e.data.size, e.data.type, e.data);
+
+            // Prepare and send the current audio chunk to the server
+            const formData = new FormData();
+            // formData.append("audio_chunk", e.data);
+            formData.append("audio_chunk", new Blob([...chunks, e.data], { type: "audio/webm" }));
+            formData.append("uuid", clientUUID); // Assuming you've already obtained `clientUUID` from the server
+            await fetch("/stream-audio", {
+              method: "POST",
+              body: formData,
+            });
+          }
+
           chunks.push(e.data);
         };
 
@@ -128,7 +230,7 @@
 
         actionBtn.addEventListener("click", () => {
           if (state === "idle") {
-            mediaRecorder.start();
+            mediaRecorder.start(2000);
           } else if (state === "recording") {
             mediaRecorder.stop();
           }

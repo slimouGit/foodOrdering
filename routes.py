@@ -1,19 +1,34 @@
 import time
 import uuid
 from flask import Flask, jsonify, render_template
-from api import validateOrder, textToSpeech, speechToText, find_latest_recording
+from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording
 from database import initGoods, showGoods, get_goods_by_id
 import os
 from flask import request
 from config import PATH
+from flask_socketio import SocketIO, join_room, leave_room, emit
+import random
 
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 @app.route('/')
 def yourDriveIn():
     initGoods()
-    return render_template('index.html')
+    items = showGoods()
+    modified_items = []
+
+    for item in items:
+        # Convert tuple to list
+        mod_item = list(item)
+        
+        # Randomly assign size classes for demonstration
+        size_class = random.choice(['grid-span-1', 'grid-span-2', 'grid-row-2'])
+        mod_item.append(size_class)  # Now you can append because mod_item is a list
+
+        modified_items.append(mod_item)
+    return render_template('index.html', items=modified_items)
 
 # retrieve audio file and save to the specified output directory, returning HTTP status code of 204
 @app.route('/upload', methods=['POST'])
@@ -61,3 +76,35 @@ def get_goods_by_id_route(id):
         return "No data found for ID: " + str(id), 404
     else:
         return render_template('goods.html', data=[data])
+
+@socketio.on('connect')
+def on_connect():
+    client_uuid = str(uuid.uuid4())
+    join_room(client_uuid)  # Automatically join the client into a room named after their UUID
+    emit('assign_uuid', {'uuid': client_uuid}, room=client_uuid)
+    # Highlight the first item by default for testing purposes
+    emit('highlight', {'typ': 'select', 'id': 1}, room=client_uuid)
+    print(f'Assigned UUID {client_uuid} to client {request.sid}')
+
+@app.route('/stream-audio', methods=['POST'])
+def stream_audio():
+    # UUID and audio file chunk are expected in the request
+    client_uuid = request.form.get('uuid')
+    audio_chunk = request.files['audio_chunk']
+
+    if not audio_chunk:
+        return jsonify({"error": "No audio chunk provided"}), 400
+
+    text = streaming_audio_to_text(audio_chunk)
+
+    print(f'Client {client_uuid} said: {text}')
+
+    # Based on the processed text, decide whether to send a select or deselect event
+    # This is simplified; you'd likely have logic to map specific speech content to actions
+
+    # if "select" in text:
+    #     socketio.emit('highlight', {'typ': 'select', 'id': 'some_item_id'}, room=client_uuid)
+    # elif "deselect" in text:
+    #     socketio.emit('highlight', {'typ': 'deselect', 'id': 'some_item_id'}, room=client_uuid)
+
+    return jsonify(success=True), 200

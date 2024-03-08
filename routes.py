@@ -37,20 +37,17 @@ def takeOrder():
 
     if text:
         # Process the provided text
-        itemDto = validateOrder(text)
-        # itemDto = get_items_from_db(items)
+        order = validateOrder(text)
     elif recording_id:
         recording_path = find_latest_recording(recording_id)
         if not recording_path:
             return render_template('error.html', message="We're sorry, we couldn't find your order recording.")
         text = speechToText(recording_path)
-        items = validateOrder(text)
-        # itemDto = get_items_from_db(items)
+        order = validateOrder(text)
     else:
-        return render_template('error.html',
-                               message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
+        return render_template('error.html', message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
 
-    return render_template('order.html', items=items)
+    return render_template('order_tmp.html', order=order)
 
 
 @app.route('/goods')

@@ -17,12 +17,12 @@ def initGoods():
     c.execute('''CREATE TABLE goods
                      (id INTEGER PRIMARY KEY, name text, description text, price real, image_path text)''')
     c.execute(
-        "INSERT INTO goods (name, description, price, image_path) VALUES ('burger', 'Delicious chicken nuggets', 35.14, 'static/Burger.jpg')")
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('burger', 'Delicious chicken nuggets', 35.14, '../static/Burger.jpg')")
     c.execute(
-        "INSERT INTO goods (name, description, price, image_path) VALUES ('coca-cola', 'Wonderfull Softdrink', 5.14, 'static/Coke.jpg')")
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('coca-cola', 'Wonderfull Softdrink', 5.14, '../static/Coke.jpg')")
     conn.commit()
     c.execute(
-        "INSERT INTO goods (name, description, price, image_path) VALUES ('chicken nuggets', 'Crunchy Nuggets', 25.14, 'static/Nuggets.jpg')")
+        "INSERT INTO goods (name, description, price, image_path) VALUES ('chicken nuggets', 'Crunchy Nuggets', 25.14, '../static/Nuggets.jpg')")
     conn.commit()
     c.execute('SELECT * FROM goods')
     print(c.fetchall())

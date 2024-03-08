@@ -34,7 +34,7 @@ def validateOrder(order_transcription):
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
             itemDto = get_items_from_db(items)
-            return items
+            return itemDto
         else:
             return ["Error: Unable to process the order. Please try again."]
     except openai.APIConnectionError as e:

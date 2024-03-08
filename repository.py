@@ -1,11 +1,7 @@
 import sqlite3
-class ItemDTO:
-    def __init__(self, id, name, description, price, image_path):
-        self.id = id
-        self.name = name
-        self.description = description
-        self.price = price
-        self.image_path = image_path
+
+from dto.ItemDTO import ItemDTO
+
 def showGoods():
     conn = sqlite3.connect('goods.db')
     c = conn.cursor()

@@ -2,7 +2,7 @@ import time
 import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
-from database import initGoods, showGoods, get_goods_by_id, get_item_by_name, get_items_from_db
+from database import initData, showGoods, get_goods_by_id, get_item_by_synonym, get_items_from_db
 import os
 from flask import request
 from config import PATH
@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def yourDriveIn():
-    initGoods()
+    initData()
     return render_template('index.html')
 
 # retrieve audio file and save to the specified output directory, returning HTTP status code of 204
@@ -32,9 +32,6 @@ def upload():
 def takeOrder():
     text = request.args.get('text')
     recording_id = request.args.get('recording_id')
-
-    itemDto = []  # Initialize itemDto as an empty list
-
     if text:
         # Process the provided text
         order = validateOrder(text)
@@ -66,7 +63,7 @@ def get_goods_by_id_route(id):
 
 @app.route('/goods/<string:name>')
 def get_item_by_name_route(name):
-    data = get_item_by_name(name)
+    data = get_item_by_synonym(name)
     if data is None:
         return "No data found for ID: " + str(id), 404
     else:

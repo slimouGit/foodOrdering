@@ -2,7 +2,8 @@ import time
 import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
-from database import initData, showGoods, get_goods_by_id, get_item_by_synonym, get_items_from_db
+from database import initData
+from repository import showGoods, get_goods_by_id, get_item_by_synonym
 import os
 from flask import request
 from config import PATH
@@ -44,7 +45,7 @@ def takeOrder():
     else:
         return render_template('error.html', message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
 
-    return render_template('order_tmp.html', order=order)
+    return render_template('order.html', order=order)
 
 
 @app.route('/goods')

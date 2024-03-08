@@ -9,7 +9,7 @@ from operator import itemgetter
 import uuid
 import time
 
-from database import get_items_from_db
+from repository import get_items_from_db
 
 client = OpenAI(api_key=API_KEY)
 

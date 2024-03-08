@@ -52,3 +52,4 @@ def get_items_from_db(item_names):
             dto = ItemDTO(item[0], item[1], item[2], item[3], item[4])
             dto_list.append(dto)
     return dto_list
+

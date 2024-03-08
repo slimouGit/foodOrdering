@@ -34,24 +34,25 @@ def validateOrder(order_transcription):
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
             itemDto = get_items_from_db(items)
-            return itemDto
+            total_price = calculate_total_order_price(itemDto)
+            return itemDto, total_price
         else:
-            return ["Error: Unable to process the order. Please try again."]
+            return ["Error: Unable to process the order. Please try again."], 0
     except openai.APIConnectionError as e:
         print("The server could not be reached")
         print(e.__cause__)  # an underlying Exception, likely raised within httpx.
-        return ["Error: The server could not be reached."]
+        return ["Error: The server could not be reached."], 0
     except openai.RateLimitError as e:
         print("A 429 status code was received; we should back off a bit.")
-        return ["Error: Rate limit exceeded. Please try again later."]
+        return ["Error: Rate limit exceeded. Please try again later."], 0
     except openai.APIStatusError as e:
         print("Another non-200-range status code was received")
         print(e.status_code)
         print(e.response)
-        return [f"Error: An API error occurred with status code {e.status_code}."]
+        return [f"Error: An API error occurred with status code {e.status_code}."], 0
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
-        return ["Error: An unexpected error occurred."]
+        return ["Error: An unexpected error occurred."],
 
 #Determined order is displayed for confirmation
 # def takeOrder():
@@ -97,3 +98,10 @@ def speechToText(audio_file_path):
         )
     print(transcript.text)
     return transcript.text
+
+def calculate_total_order_price(items):
+    total_price = 0
+    for item in items:
+        total_price += item.price
+    print(total_price)
+    return total_price

@@ -9,7 +9,7 @@ from operator import itemgetter
 import uuid
 import time
 
-from repository import get_items_from_db
+from repository import get_items_by_names
 
 client = OpenAI(api_key=API_KEY)
 
@@ -33,7 +33,7 @@ def validateOrder(order_transcription):
             json_string = response.choices[0].message.content
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
-            itemDto = get_items_from_db(items)
+            itemDto = get_items_by_names(items)
             total_price = calculate_total_order_price(itemDto)
             return itemDto, total_price
         else:

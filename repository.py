@@ -37,14 +37,11 @@ def get_item_by_synonym(word):
     else:
         return data
 
-def get_items_from_db(item_names):
+def get_items_by_names(item_names):
     dto_list = []
-    # Iterate over the item names
     for item_name in item_names:
-        # Fetch the item from the database by its name
         item = get_item_by_synonym(item_name.lower())
         if item is not None:
-            # Convert the item to an ItemDTO and append it to the list
             dto = ItemDTO(item[0], item[1], item[2], item[3], item[4])
             dto_list.append(dto)
     return dto_list

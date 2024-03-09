@@ -3,6 +3,7 @@ import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
 from database import initData
+from errormessage import COULD_NOT_PROCESS_ORDER, COULD_NOT_FIND_ORDER_RECORDING
 from repository import showGoods, get_goods_by_id, get_item_by_synonym
 import os
 from flask import request
@@ -39,11 +40,14 @@ def takeOrder():
     elif recording_id:
         recording_path = find_latest_recording(recording_id)
         if not recording_path:
-            return render_template('error.html', message="We're sorry, we couldn't find your order recording.")
+            return render_template('error.html', message=COULD_NOT_FIND_ORDER_RECORDING)
         text = speechToText(recording_path)
-        order, total_price = validateOrder(text)
+        try:
+            order, total_price = validateOrder(text)
+        except Exception as e:
+            return render_template('error.html', message=COULD_NOT_PROCESS_ORDER)
     else:
-        return render_template('error.html', message="We're sorry, we couldn't process your order. No text or recording ID was provided.")
+        return render_template('error.html', message=COULD_NOT_PROCESS_ORDER)
 
     return render_template('order.html', order=order, total_price=total_price)
 

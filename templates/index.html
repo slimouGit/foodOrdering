@@ -71,9 +71,45 @@
         .pulse {
             animation: pulseAnimation 2s infinite;
         }
+
+        @keyframes slideDown {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .message-container {
+            animation: slideDown 0.1s ease-out;
+            position: relative;
+            top: 0;
+            height: 5em;
+            background: rgb(158, 3, 22);
+            background: linear-gradient(90deg, rgba(158, 3, 22, 1) 0%, rgba(249, 0, 0, 1) 35%, rgba(255, 76, 0, 1) 100%);
+            text-align: center;
+            padding: 16px;
+        }
+
+        .message-container p {
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+
     </style>
 </head>
 <body class="bg-gray-800">
+
+{% if message %}
+    <div class="message-container">
+        <p>{{ message }}</p>
+    </div>
+{% endif %}
 <div class="min-h-screen flex flex-col md:flex-row hero-bg">
     <div class="md:w-1/2 p-10 flex flex-col justify-center relative z-20">
         <h3 class="text-xl text-white">
@@ -154,5 +190,6 @@
         }
     }
 </script>
+
 </body>
 </html>

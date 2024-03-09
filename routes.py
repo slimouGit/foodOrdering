@@ -3,7 +3,8 @@ import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
 from database import initData
-from errormessage import COULD_NOT_PROCESS_ORDER, COULD_NOT_FIND_ORDER_RECORDING
+from errormessage import COULD_NOT_PROCESS_ORDER, COULD_NOT_FIND_ORDER_RECORDING, \
+    COULD_NOT_FIND_ORDER_RECORDING_TRY_AGAIN
 from repository import showGoods, get_goods_by_id, get_item_by_synonym
 import os
 from flask import request
@@ -45,7 +46,8 @@ def takeOrder():
         try:
             order, total_price = validateOrder(text)
         except Exception as e:
-            return render_template('error.html', message=COULD_NOT_PROCESS_ORDER)
+
+            return render_template('index.html', message=COULD_NOT_FIND_ORDER_RECORDING_TRY_AGAIN)
     else:
         return render_template('error.html', message=COULD_NOT_PROCESS_ORDER)
 

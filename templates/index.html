@@ -109,6 +109,14 @@
         transform: scale(1.05);
         border: 2px solid #ffd700; /* Initial state color */
       }
+
+      @media (min-width: 768px) {
+        /* TailwindCSS md: breakpoint */
+        .scrollable-bento-grid {
+          max-height: 80vh; /* Adjust based on your design needs */
+          overflow-y: auto; /* Enables vertical scrolling */
+        }
+      }
     </style>
   </head>
   <body class="bg-gray-800">
@@ -126,7 +134,9 @@
       </div>
       <!-- Background image for desktop is handled via CSS, with a shadow overlay -->
       <div class="md:w-1/2">
-        <div class="container mx-auto p-6 relative z-20">
+        <div
+          class="container min-h-full mx-auto p-6 relative z-20 scrollable-bento-grid"
+        >
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="bentoGrid">
             {% for item in items %}
             <div
@@ -138,6 +148,13 @@
                 <h5 class="text-white text-xl leading-tight font-medium mb-2">
                   {{ item[1] }}
                 </h5>
+                <!-- Initially hidden description -->
+                <p
+                  class="text-white opacity-75 text-sm description"
+                  style="display: none"
+                >
+                  {{ item[2] }}
+                </p>
               </div>
             </div>
             {% endfor %}
@@ -186,6 +203,22 @@
             highlightedItems.splice(index, 1); // Remove from highlighted items
           }
         }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll("#bentoGrid .card");
+
+        cards.forEach((card) => {
+          const img = card.querySelector("img");
+          const titleDiv = card.querySelector("div.p-4");
+          const description = card.querySelector("p.description");
+
+          const contentHeight = img.offsetHeight + titleDiv.offsetHeight;
+          if (description && contentHeight < card.offsetHeight) {
+            // There is extra space, so show the description
+            description.style.display = "block";
+          }
+        });
       });
 
       const actionBtn = document.querySelector("#actionBtn");

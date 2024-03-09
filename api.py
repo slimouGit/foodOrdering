@@ -127,3 +127,52 @@ def streaming_audio_to_text(audio_chunk):
         model="whisper-1",
     )
     return transcript.text
+
+def obtain_highlight_events(text, highlighted_items, goods):
+    """
+    Send a request to OpenAI to interpret the transcribed text and obtain highlight events.
+    """
+    # Prepare the list of current menu items as a string
+    # TODO switch to a proper data model
+    # goods_list_str = ", ".join([f"id {id}: {name}" for id, name in goods])
+    goods_list_str = ", ".join([f"id: {item[0]}, name: {item[1]}" for item in goods])
+
+    highlighted_items_str = json.dumps(highlighted_items)
+
+    print(f"Highlighting items: {highlighted_items_str}")
+
+    print(type(goods_list_str))  # Should output: <class 'str'>
+    print(type(highlighted_items_str))  # Should output: <class 'str'>
+    print(goods_list_str)
+    print(highlighted_items_str)
+
+    system_prompt = f"""You are a smart assistant in a restaurant. Interpret customer orders and convert them to a json array of highlight events like [{{"id": "1", "typ": "select"}}, {{"id": "1", "typ": "deselect"}}]. Here are the current menu items we have available: [{goods_list_str}]. Currently selected items: {highlighted_items_str}. Only return the differences between the current selection and the new selection provided by the user. Never respond different than a valid json array."""
+    
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": text,
+                },
+            ],
+            temperature=0.5,
+        )
+
+        if response and response.choices:
+            json_string = response.choices[0].message.content
+            print(f"Obtained highlight events: {json_string}")
+            # Convert the string representation to a Python list of events
+            events = json.loads(json_string)
+            return events
+    except Exception as e:
+        print(f"An error occurred while obtaining highlight events: {str(e)}")
+        return []
+
+    return []
+

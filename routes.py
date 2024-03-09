@@ -1,13 +1,14 @@
 import time
 import uuid
 from flask import Flask, jsonify, render_template
-from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording
+from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording, obtain_highlight_events
 from database import initGoods, showGoods, get_goods_by_id
 import os
 from flask import request
 from config import PATH
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import random
+import json
 
 
 app = Flask(__name__)
@@ -83,7 +84,7 @@ def on_connect():
     join_room(client_uuid)  # Automatically join the client into a room named after their UUID
     emit('assign_uuid', {'uuid': client_uuid}, room=client_uuid)
     # Highlight the first item by default for testing purposes
-    emit('highlight', {'typ': 'select', 'id': 1}, room=client_uuid)
+    #emit('highlight', {'typ': 'select', 'id': 1}, room=client_uuid)
     print(f'Assigned UUID {client_uuid} to client {request.sid}')
 
 @app.route('/stream-audio', methods=['POST'])
@@ -91,6 +92,8 @@ def stream_audio():
     # UUID and audio file chunk are expected in the request
     client_uuid = request.form.get('uuid')
     audio_chunk = request.files['audio_chunk']
+    highlighted_items_json = request.form.get('highlightedItems', '[]')
+    highlighted_items = json.loads(highlighted_items_json)  # Parse the JSON string back into a Python list
 
     if not audio_chunk:
         return jsonify({"error": "No audio chunk provided"}), 400
@@ -98,6 +101,13 @@ def stream_audio():
     text = streaming_audio_to_text(audio_chunk)
 
     print(f'Client {client_uuid} said: {text}')
+
+    goods = showGoods()
+
+    events = obtain_highlight_events(text, highlighted_items, goods)
+
+    for event in events:
+        socketio.emit('highlight', event, room=client_uuid)
 
     # Based on the processed text, decide whether to send a select or deselect event
     # This is simplified; you'd likely have logic to map specific speech content to actions

@@ -149,6 +149,7 @@
       let state = "idle"; // Possible states: idle, recording, sending
       let mediaRecorder;
       let chunks = [];
+      let highlightedItems = [];
 
       var socket = io.connect(
         "http://" + document.domain + ":" + location.port
@@ -172,9 +173,16 @@
         if (!itemElement) return;
 
         if (typ === "select") {
-          itemElement.classList.add("highlight");
+          if (!highlightedItems.includes(id)) {
+            itemElement.classList.add("highlight");
+            highlightedItems.push(id); // Add to highlighted items if not already present
+          }
         } else if (typ === "deselect") {
-          itemElement.classList.remove("highlight");
+          const index = highlightedItems.indexOf(id);
+          if (index > -1) {
+            itemElement.classList.remove("highlight");
+            highlightedItems.splice(index, 1); // Remove from highlighted items
+          }
         }
       });
 
@@ -200,8 +208,12 @@
             // Prepare and send the current audio chunk to the server
             const formData = new FormData();
             // formData.append("audio_chunk", e.data);
-            formData.append("audio_chunk", new Blob([...chunks, e.data], { type: "audio/webm" }));
+            formData.append(
+              "audio_chunk",
+              new Blob([...chunks, e.data], { type: "audio/webm" })
+            );
             formData.append("uuid", clientUUID); // Assuming you've already obtained `clientUUID` from the server
+            formData.append("highlightedItems", JSON.stringify(highlightedItems));
             await fetch("/stream-audio", {
               method: "POST",
               body: formData,
@@ -230,7 +242,7 @@
 
         actionBtn.addEventListener("click", () => {
           if (state === "idle") {
-            mediaRecorder.start(2000);
+            mediaRecorder.start(500);
           } else if (state === "recording") {
             mediaRecorder.stop();
           }

@@ -130,13 +130,15 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="bentoGrid">
             {% for item in items %}
             <div
-              class="card bg-white rounded-lg overflow-hidden shadow-lg p-4 transition-transform duration-500 {{ item[-1] }}"
+              class="card bg-gradient-to-r from-gray-700 to-gray-900 rounded-lg overflow-hidden shadow-lg {{ item[-1] }}"
               id="item-{{ item[0] }}"
             >
               <img src="{{ item[4] }}" alt="{{ item[1] }}" class="w-full" />
-              <h5 class="text-gray-900 text-xl leading-tight font-medium mb-2">
-                {{ item[1] }}
-              </h5>
+              <div class="p-4">
+                <h5 class="text-white text-xl leading-tight font-medium mb-2">
+                  {{ item[1] }}
+                </h5>
+              </div>
             </div>
             {% endfor %}
           </div>
@@ -213,7 +215,10 @@
               new Blob([...chunks, e.data], { type: "audio/webm" })
             );
             formData.append("uuid", clientUUID); // Assuming you've already obtained `clientUUID` from the server
-            formData.append("highlightedItems", JSON.stringify(highlightedItems));
+            formData.append(
+              "highlightedItems",
+              JSON.stringify(highlightedItems)
+            );
             await fetch("/stream-audio", {
               method: "POST",
               body: formData,

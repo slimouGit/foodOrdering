@@ -128,6 +128,34 @@ def streaming_audio_to_text(audio_chunk):
     )
     return transcript.text
 
+import random
+
+def assign_size_classes_balanced(items):
+    modified_items = []
+    row_capacity = 3  # Assuming a 3-column grid
+    row_fill = 0
+
+    for item in items:
+        mod_item = list(item)
+        if row_fill == 2:  # Only 1 unit can fit
+            size_class = 'grid-span-1'
+            row_fill = 0  # Reset for new row
+        elif row_fill == 1:  # Either 1 or 2 units can fit
+            size_class = random.choice(['grid-span-1', 'grid-span-2'])
+            row_fill = 0 if size_class == 'grid-span-2' else 1
+        else:  # Row is empty, any size can fit
+            size_class = random.choice(['grid-span-1', 'grid-span-2', 'grid-row-2'])
+            row_fill += 2 if size_class in ['grid-span-2', 'grid-row-2'] else 1
+        
+        if row_fill >= row_capacity:  # Reset fill if row is full
+            row_fill = 0
+
+        mod_item.append(size_class)
+        modified_items.append(mod_item)
+
+    return modified_items
+
+
 def obtain_highlight_events(text, highlighted_items, goods):
     """
     Send a request to OpenAI to interpret the transcribed text and obtain highlight events.

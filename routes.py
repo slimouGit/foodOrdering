@@ -1,7 +1,7 @@
 import time
 import uuid
 from flask import Flask, jsonify, render_template
-from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording, obtain_highlight_events
+from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording, obtain_highlight_events, assign_size_classes_balanced
 from database import initGoods, showGoods, get_goods_by_id
 import os
 from flask import request
@@ -18,17 +18,8 @@ socketio = SocketIO(app)
 def yourDriveIn():
     initGoods()
     items = showGoods()
-    modified_items = []
-
-    for item in items:
-        # Convert tuple to list
-        mod_item = list(item)
-        
-        # Randomly assign size classes for demonstration
-        size_class = random.choice(['grid-span-1', 'grid-span-2', 'grid-row-2'])
-        mod_item.append(size_class)  # Now you can append because mod_item is a list
-
-        modified_items.append(mod_item)
+    modified_items = assign_size_classes_balanced(items)
+    print(f"Modified items: {modified_items}")
     return render_template('index.html', items=modified_items)
 
 # retrieve audio file and save to the specified output directory, returning HTTP status code of 204

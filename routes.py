@@ -63,10 +63,26 @@ def get_goods_by_id_route(id):
         return render_template('goods.html', data=[data])
 @app.route('/card')
 def dummyCard():
-    item = {
+    items = []
+    item1 = {
         'name': 'Chicken Nugget Burger',
-        'price': 2.99,
+        'price': 5.99,
         'description': 'Delicious Chicken Nugget Burger',
         'image_path': '../static/goods/Burger.jpg'
     }
-    return render_template('card.html', item=item)
+    item2 = {
+        'name': 'Coca-Cola',
+        'price': 1.99,
+        'description': 'Wonderfull Softdrink',
+        'image_path': '../static/goods/Coke.jpg'
+    }
+    item3 = {
+        'name': 'Chicken Nuggets',
+        'price': 3.99,
+        'description': 'Crunchy Chicken Nuggets',
+        'image_path': '../static/goods/Nuggets.jpg'
+    }
+    items.append(item1)
+    items.append(item2)
+    items.append(item3)
+    return render_template('card.html', items=items)

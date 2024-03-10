@@ -3,29 +3,28 @@
 <style>
     .price-circle {
         position: relative;
-        bottom: -30px;
-        right: -250px;
+        bottom: 10px;
+        right: -200px;
         background: yellow;
-        color: red;
         border-radius: 50%;
-        width: 100px;
-        height: 100px;
+        border: 3px solid black;
+        width: 150px;
+        height: 80px;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 </style>
 
 
-<div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" style="background: rgb(127,135,156); background: linear-gradient(90deg, rgba(127,135,156,1) 0%, rgba(0,15,18,1) 49%); height: 75%;">
-    <a href="#">
-        <img class="rounded-t-lg" src="{{ item.image_path }}" alt="" style="width: 100%;" />
-    </a>
+<div class="max-w-sm bg-white mb-10 mr-10 border-black border border-gray-200 rounded-xl shadow dark:bg-gray-800 dark:border-gray-700" style="background: rgb(127,135,156); background: linear-gradient(90deg, rgba(127,135,156,1) 0%, rgba(0,15,18,1) 49%); height: 430px;">
+    <img class="rounded-t-lg" src="{{ item.image_path }}" alt="" style="width: 100%;" />
     <div class="p-5">
-        <h5 class="mb-2 text-2xl font-bold tracking-tight text-white dark:text-white">{{ item.name }}</h5>
+        <h5 class="mb-2 text-3xl font-bold tracking-tight text-white dark:text-white">{{ item.name }}</h5>
         <p class="mb-3 font-normal text-white dark:text-gray-400">{{ item.description }}</p>
-        <div class="price-circle">
+        <div class="price-circle text-red-500 font-bold text-3xl rotate-30">
             <h1>{{item.price}}  &#8364; </h1>
         </div>
     </div>

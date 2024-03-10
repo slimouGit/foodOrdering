@@ -61,3 +61,12 @@ def get_goods_by_id_route(id):
         return "No data found for ID: " + str(id), 404
     else:
         return render_template('goods.html', data=[data])
+@app.route('/card')
+def dummyCard():
+    item = {
+        'name': 'Chicken Nugget Burger',
+        'price': 2.99,
+        'description': 'Delicious Chicken Nugget Burger',
+        'image_path': '../static/goods/Burger.jpg'
+    }
+    return render_template('card.html', item=item)

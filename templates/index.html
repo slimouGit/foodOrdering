@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spaceburgers Order</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @media (min-width: 1024px) {
         .hero-bg::before {
@@ -160,6 +157,19 @@
             {% endfor %}
           </div>
         </div>
+        <div
+          class="fixed bottom-4 right-4 flex items-center p-2 bg-gradient-to-r from-f6d365 to-fda085 rounded-full shadow-lg cursor-pointer z-50 bg-slate-800 opacity-75"
+          id="fabContainer"
+        >
+          <label class="relative inline-flex cursor-pointer items-center">
+            <input id="menuToggleSwitch" type="checkbox" class="peer sr-only" />
+            <label for="menuToggleSwitch" class="hidden"></label>
+            <div class="peer-checked:bg-gradient-to-r peer-checked:from-yellow-400 peer-checked:via-orange-200 peer-checked:to-orange-500 bg-slate-800 peer h-6 w-11 rounded-full border after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-green-300"></div>
+          </label>        
+          <span class="ml-3 text-white font-medium" id="fabText"
+            >Menu Preview</span
+          >
+        </div>
       </div>
     </div>
 
@@ -203,6 +213,35 @@
             highlightedItems.splice(index, 1); // Remove from highlighted items
           }
         }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggleSwitch = document.getElementById("menuToggleSwitch");
+        const menuContainer = document.querySelector(".scrollable-bento-grid");
+        const fabText = document.getElementById("fabText");
+        // Initialize menu visibility state: default to hidden
+        localStorage.setItem("isMenuVisible", false);
+
+        // Function to load and update menu visibility
+        function updateMenuVisibility() {
+          const isMenuVisible =
+            localStorage.getItem("isMenuVisible") !== "false";
+          menuContainer.style.display = isMenuVisible ? "block" : "none";
+          toggleSwitch.checked = isMenuVisible;
+          fabText.textContent = isMenuVisible
+            ? "Close Menu"
+            : "Open Menu";
+        }
+
+        // Initialize based on saved state
+        updateMenuVisibility();
+
+        // Toggle menu on click and save state
+        toggleSwitch.addEventListener("change", () => {
+          const isMenuVisible = toggleSwitch.checked;
+          localStorage.setItem("isMenuVisible", isMenuVisible);
+          updateMenuVisibility();
+        });
       });
 
       document.addEventListener("DOMContentLoaded", () => {

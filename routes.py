@@ -3,20 +3,38 @@ import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
 from database import initData
+from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording, obtain_highlight_events
+
 from errormessage import COULD_NOT_PROCESS_ORDER, COULD_NOT_FIND_ORDER_RECORDING, \
     COULD_NOT_FIND_ORDER_RECORDING_TRY_AGAIN
 from repository import showGoods, get_goods_by_id, get_item_by_synonym
 import os
 from flask import request
 from config import PATH
+from flask_socketio import SocketIO, join_room, leave_room, emit
+import random
+import json
 
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 @app.route('/')
 def yourDriveIn():
     initData()
-    return render_template('index.html')
+    items = showGoods()
+    modified_items = []
+
+    for item in items:
+        # Convert tuple to list
+        mod_item = list(item)
+
+        # Randomly assign size classes for demonstration
+        size_class = random.choice(['grid-span-1', 'grid-span-2', 'grid-row-2'])
+        mod_item.append(size_class)  # Now you can append because mod_item is a list
+
+        modified_items.append(mod_item)
+    return render_template('index.html', items=modified_items)
 
 # retrieve audio file and save to the specified output directory, returning HTTP status code of 204
 @app.route('/upload', methods=['POST'])
@@ -67,6 +85,48 @@ def get_goods_by_id_route(id):
         return "No data found for ID: " + str(id), 404
     else:
         return render_template('goods.html', data=[data])
+
+@socketio.on('connect')
+def on_connect():
+    client_uuid = str(uuid.uuid4())
+    join_room(client_uuid)  # Automatically join the client into a room named after their UUID
+    emit('assign_uuid', {'uuid': client_uuid}, room=client_uuid)
+    # Highlight the first item by default for testing purposes
+    #emit('highlight', {'typ': 'select', 'id': 1}, room=client_uuid)
+    print(f'Assigned UUID {client_uuid} to client {request.sid}')
+
+@app.route('/stream-audio', methods=['POST'])
+def stream_audio():
+    # UUID and audio file chunk are expected in the request
+    client_uuid = request.form.get('uuid')
+    audio_chunk = request.files['audio_chunk']
+    highlighted_items_json = request.form.get('highlightedItems', '[]')
+    highlighted_items = json.loads(highlighted_items_json)  # Parse the JSON string back into a Python list
+
+    if not audio_chunk:
+        return jsonify({"error": "No audio chunk provided"}), 400
+
+    text = streaming_audio_to_text(audio_chunk)
+
+    print(f'Client {client_uuid} said: {text}')
+
+    goods = showGoods()
+
+    events = obtain_highlight_events(text, highlighted_items, goods)
+
+    for event in events:
+        socketio.emit('highlight', event, room=client_uuid)
+
+    # Based on the processed text, decide whether to send a select or deselect event
+    # This is simplified; you'd likely have logic to map specific speech content to actions
+
+    # if "select" in text:
+    #     socketio.emit('highlight', {'typ': 'select', 'id': 'some_item_id'}, room=client_uuid)
+    # elif "deselect" in text:
+    #     socketio.emit('highlight', {'typ': 'deselect', 'id': 'some_item_id'}, room=client_uuid)
+
+    return jsonify(success=True), 200
+
 @app.route('/card')
 def dummyCard():
     items = []

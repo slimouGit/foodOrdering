@@ -13,7 +13,7 @@
         <div class="w-full md:w-2/3 px-4 mb-6 md:mb-0">
             <h1 class="text-2xl font-bold text-gray-900 mb-6">Confirm Your Order</h1>
             <div class="flex flex-wrap -mx-2">
-                {% from "macros.html" import item_card with context %}
+                {% from "item-card.html" import item_card with context %}
                 {% for item in order %}
                     {{ item_card(item) }}
                 {% endfor %}

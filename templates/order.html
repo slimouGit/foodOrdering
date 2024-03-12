@@ -15,7 +15,7 @@
             <div class="flex flex-wrap -mx-2">
                 {% from "item-card.html" import item_card with context %}
                 {% for item in order %}
-                    {{ item_card(item) }}
+                    {{ item_card(item, true) }}
                 {% endfor %}
             </div>
         </div>

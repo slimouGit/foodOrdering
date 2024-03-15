@@ -41,3 +41,29 @@ def initGoods():
     c.execute('SELECT * FROM goods')
     print(c.fetchall())
     conn.close()
+
+def initOrder():
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS order")
+    c.execute('''
+        CREATE TABLE order
+        (id INTEGER PRIMARY KEY, 
+        order_id INTEGER, 
+        good_id INTEGER, 
+        quantity INTEGER,
+        FOREIGN KEY(good_id) REFERENCES goods(id))
+    ''')
+    conn.commit()
+    conn.close()
+
+def insertOrder():
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+
+    c.execute("INSERT INTO order (order_id, good_id, quantity) VALUES (1, 2, 2)")
+
+    c.execute("INSERT INTO order (order_id, good_id, quantity) VALUES (1, 1, 1)")
+
+    conn.commit()
+    conn.close()

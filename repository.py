@@ -1,6 +1,6 @@
 import sqlite3
 
-from dto.ItemDTO import ItemDTO
+from dto.itemDTO import ItemDTO
 
 
 def showGoods():
@@ -46,4 +46,26 @@ def get_items_by_names(item_names):
             dto = ItemDTO(item[0], item[1], item[2], item[3], item[4])
             dto_list.append(dto)
     return dto_list
+
+def add_goods_to_order(order_id, good_id, quantity):
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+
+    c.execute("INSERT INTO order (order_id, good_id, quantity) VALUES (?, ?, ?)", (order_id, good_id, quantity))
+
+    conn.commit()
+    conn.close()
+
+def remove_goods_from_order_by_name(order_id, good_name):
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+
+    c.execute('SELECT id FROM goods WHERE name=?', (good_name,))
+    good_id = c.fetchone()
+
+    if good_id is not None:
+        c.execute("DELETE FROM order WHERE order_id=? AND good_id=?", (order_id, good_id[0]))
+
+    conn.commit()
+    conn.close()
 

@@ -36,6 +36,17 @@
             </div>
         </div>
     </div>
+    {% if orderingItems %}
+    <ul>
+    {% for orderingItem in orderingItems %}
+        <li>Order ID: {{ orderingItem[1] }}, Good ID: {{ orderingItem[2] }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No goods in your order.</p>
+{% endif %}
+
+
 </div>
 </body>
 </html>

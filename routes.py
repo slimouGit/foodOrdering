@@ -2,7 +2,7 @@ import time
 import uuid
 from flask import Flask, jsonify, render_template
 from api import validateOrder, textToSpeech, speechToText, find_latest_recording
-from database import initData
+from database import initData, get_all_goods_from_ordering
 from api import streaming_audio_to_text, validateOrder, textToSpeech, speechToText, find_latest_recording, obtain_highlight_events
 
 from errormessage import COULD_NOT_PROCESS_ORDER, COULD_NOT_FIND_ORDER_RECORDING, \
@@ -68,8 +68,8 @@ def takeOrder():
             return render_template('index.html', message=COULD_NOT_FIND_ORDER_RECORDING_TRY_AGAIN)
     else:
         return render_template('error.html', message=COULD_NOT_PROCESS_ORDER)
-
-    return render_template('order.html', order=order, total_price=total_price)
+    orderingItems = get_all_goods_from_ordering()
+    return render_template('order.html', order=order, total_price=total_price, orderingItems=orderingItems)
 
 
 @app.route('/goods')

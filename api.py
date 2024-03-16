@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 import io
 
-from repository import get_items_by_names
+from repository import get_items_by_names, add_goods_to_order
 
 client = OpenAI(api_key=API_KEY)
 
@@ -37,7 +37,9 @@ def validateOrder(order_transcription):
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
             itemDto = get_items_by_names(items)
+            storeOrder(itemDto)
             total_price = calculate_total_order_price(itemDto)
+
             return itemDto, total_price
         else:
             return ["Error: Unable to process the order. Please try again."], 0
@@ -186,4 +188,10 @@ def obtain_highlight_events(text, highlighted_items, goods):
         return []
 
     return []
+
+def storeOrder(itemDto):
+    for item in itemDto:
+        add_goods_to_order(1, item.id)
+
+
 

@@ -4,6 +4,7 @@ import sqlite3
 def initData():
     initGoods()
     initSynonyms()
+    initOrdering()
 def initSynonyms():
     conn = sqlite3.connect('goods.db')
     c = conn.cursor()
@@ -42,28 +43,34 @@ def initGoods():
     print(c.fetchall())
     conn.close()
 
-def initOrder():
+def initOrdering():
     conn = sqlite3.connect('goods.db')
     c = conn.cursor()
-    c.execute("DROP TABLE IF EXISTS order")
+    c.execute("DROP TABLE IF EXISTS ordering")
     c.execute('''
-        CREATE TABLE order
+        CREATE TABLE ordering
         (id INTEGER PRIMARY KEY, 
         order_id INTEGER, 
         good_id INTEGER, 
-        quantity INTEGER,
         FOREIGN KEY(good_id) REFERENCES goods(id))
     ''')
     conn.commit()
     conn.close()
 
-def insertOrder():
+def insertOrdering():
     conn = sqlite3.connect('goods.db')
     c = conn.cursor()
 
-    c.execute("INSERT INTO order (order_id, good_id, quantity) VALUES (1, 2, 2)")
+    c.execute("INSERT INTO ordering (order_id, good_id) VALUES (1, 2)")
 
-    c.execute("INSERT INTO order (order_id, good_id, quantity) VALUES (1, 1, 1)")
-
-    conn.commit()
+    c.execute("INSERT INTO ordering (order_id, good_id) VALUES (1, 1)")
+    c.execute('SELECT * FROM ordering')
     conn.close()
+
+def get_all_goods_from_ordering():
+    conn = sqlite3.connect('goods.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM ordering')
+    data = c.fetchall()
+    conn.close()
+    return data

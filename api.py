@@ -1,5 +1,4 @@
 import openai
-from flask import render_template
 from openai import OpenAI
 import json
 from config import API_KEY, PATH
@@ -8,10 +7,9 @@ import glob
 from operator import itemgetter
 import uuid
 import time
-import tempfile
-from pathlib import Path
 import io
 
+from helper import Helper
 from repository import get_items_by_names
 
 client = OpenAI(api_key=API_KEY)
@@ -37,7 +35,7 @@ def validateOrder(order_transcription):
             # Convert the string representation of the list to a Python list
             items = json.loads(json_string)
             itemDto = get_items_by_names(items)
-            total_price = calculate_total_order_price(itemDto)
+            total_price = Helper.calculate_total_order_price(itemDto)
             return itemDto, total_price
         else:
             return ["Error: Unable to process the order. Please try again."], 0
@@ -131,13 +129,6 @@ def streaming_audio_to_text(audio_chunk):
         model="whisper-1",
     )
     return transcript.text
-
-def calculate_total_order_price(items):
-    total_price = 0
-    for item in items:
-        total_price += item.price
-    print(total_price)
-    return total_price
 
 def obtain_highlight_events(text, highlighted_items, goods):
     """

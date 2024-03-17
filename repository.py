@@ -1,6 +1,6 @@
 import sqlite3
 
-from dto.ItemDTO import ItemDTO
+from dto.itemDTO import ItemDTO
 
 
 def showGoods():

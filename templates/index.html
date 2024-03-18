@@ -155,8 +155,8 @@
               class="card bg-white rounded-lg overflow-hidden shadow-lg p-4 transition-transform duration-500 {{ item[-1] }}"
               id="item-{{ item[0] }}"
             >
-              <img src="{{ item[4] }}" alt="{{ item[1] }}" class="w-full" />
-              <h5 class="text-gray-900 text-xl leading-tight font-medium mb-2">
+              <img src="{{ item[4] }}" alt="{{ item[1] }}" class="w-full mb-4" />
+              <h5 class="mb-2 text-3xl font-bold tracking-tight text-gray-900">
                 {{ item[1] }}
               </h5>
             </div>
@@ -165,6 +165,8 @@
         </div>
       </div>
     </div>
+
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
